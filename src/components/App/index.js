@@ -65,7 +65,7 @@ function App() {
 	// }
 
 	async function tickItem(idOfTickedItem) {
-		list.map(async (item) => {
+		list.map(async (item, index) => {
 			if (item.id === idOfTickedItem) {
 				let updateItem = { ...item, completed: !item.completed };
 				console.log(updateItem);
@@ -76,8 +76,11 @@ function App() {
 				});
 				const data = await response.json();
 				console.log(data);
-				if ((data.success = true)) {
-					setList((previous) => [...previous]);
+				if (data.success === true) {
+					let newList = [...list];
+					newList[index].completed = updateItem.completed;
+
+					setList(newList);
 				}
 			}
 		});
