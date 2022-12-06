@@ -11,66 +11,83 @@ and clear all of the items in a list.
 const url = process.env.REACT_APP_BACKEND_URL ?? "http://localhost:3000";
 
 function App() {
-  const [list, setList] = useState([]);
+	const [list, setList] = useState([]);
 
-  // Fetching shopping list data from shopping list API.
-  useEffect(() => {
-    async function getShoppingList() {
-      const response = await fetch(`${url}/items`);
-      const data = await response.json(response);
-      console.log(data);
-      setList(data.payload);
-    }
-    getShoppingList();
-  }, []);
+	// Fetching shopping list data from shopping list API.
+	useEffect(() => {
+		async function getShoppingList() {
+			const response = await fetch(`${url}/items`);
+			const data = await response.json(response);
+			console.log(data);
+			setList(data.payload);
+		}
+		getShoppingList();
+	}, []);
 
-  async function addToList(newListItem) {
-    //This function changes the state of the list by pushing the text from the input field in to the array.
-    const listItemWithoutId = {
-      item: newListItem,
-      completed: false,
-    };
+	async function addToList(newListItem) {
+		//This function changes the state of the list by pushing the text from the input field in to the array.
+		const listItemWithoutId = {
+			item: newListItem,
+			completed: false,
+		};
 
-    const response = await fetch(`${url}/items`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listItem: listItemWithoutId }),
-    });
+		const response = await fetch(`${url}/items`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ listItem: listItemWithoutId }),
+		});
 
-    if (!response.ok) {
-      // Shouldn't really use alert, as it blocks, but will do for now.
-      return alert("Failed to add item, please try again later.");
-    }
+		if (!response.ok) {
+			// Shouldn't really use alert, as it blocks, but will do for now.
+			return alert("Failed to add item, please try again later.");
+		}
 
-    const data = await response.json();
-    const listItemWithId = data.payload;
+		const data = await response.json();
+		const listItemWithId = data.payload;
 
-    setList((previous) => [...previous, listItemWithId]);
-  }
+		setList((previous) => [...previous, listItemWithId]);
+	}
 
-  function clearList() {
-    //This function clears all the items that have been added to the list.
-    const clearedList = [];
-    setList(clearedList);
-  }
+	function clearList() {
+		//This function clears all the items that have been added to the list.
+		const clearedList = [];
+		setList(clearedList);
+	}
 
-  function tickItem(idOfTickedItem) {
-    setList((previous) => {
-      return previous.map((item) => {
-        return item.id !== idOfTickedItem
-          ? item
-          : { ...item, completed: !item.completed };
-      });
-    });
-  }
+	// function tickItem(idOfTickedItem) {
+	// 	setList((previous) => {
+	// 		return previous.map((item) => {
+	// 			return item.id !== idOfTickedItem
+	// 				? item
+	// 				: { ...item, completed: !item.completed };
+	// 		});
+	// 	});
+	// }
 
-  return (
-    <section>
-      <InputList addToList={addToList} buttonText={"Add To List"} />
-      <ShowList list={list} tickItem={tickItem} />
-      <ClearList clearList={clearList} buttonText={"Clear List"} />
-    </section>
-  );
+	async function tickItem(idOfTickedItem) {
+		list.map(async (item) => {
+			if (item.id === idOfTickedItem) {
+				let updateItem = { ...item, completed: !item.complete };
+				const response = await fetch(`${url}/items/${updateItem.id}`, {
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ updateItem }),
+				});
+				const data = await response.json();
+				if ((data.success = true)) {
+					setList((previous) => [...previous]);
+				}
+			}
+		});
+	}
+
+	return (
+		<section>
+			<InputList addToList={addToList} buttonText={"Add To List"} />
+			<ShowList list={list} tickItem={tickItem} />
+			<ClearList clearList={clearList} buttonText={"Clear List"} />
+		</section>
+	);
 }
 
 export default App;
