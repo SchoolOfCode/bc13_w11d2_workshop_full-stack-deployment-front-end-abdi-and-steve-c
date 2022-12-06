@@ -68,10 +68,11 @@ function App() {
 		list.map(async (item) => {
 			if (item.id === idOfTickedItem) {
 				let updateItem = { ...item, completed: !item.complete };
+				console.log(updateItem)
 				const response = await fetch(`${url}/items/${updateItem.id}`, {
 					method: "PATCH",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ updateItem }),
+					body: JSON.stringify(updateItem),
 				});
 				const data = await response.json();
 				if ((data.success = true)) {
